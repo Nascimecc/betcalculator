@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, make_response
 
 app = Flask(__name__)
 
@@ -9,7 +9,9 @@ def calc_kelly(prob_evento, odd_aposta):
         
         kelly_fraction = (prob_evento / 100 - (1 - prob_evento / 100) / (odd_aposta - 1))
         proporcao_investimento_ideal = kelly_fraction * 100
-        valor_a_ser_investido = round(((proporcao_investimento_ideal / 8) * 100) / 25) * 25
+        
+        # Calcular o valor a ser investido: cada 10% de proporção de investimento equivale a R$100
+        valor_a_ser_investido = round((proporcao_investimento_ideal / 10) * 100 / 25) * 25
         
         return proporcao_investimento_ideal, valor_a_ser_investido
     except ValueError:
@@ -23,18 +25,17 @@ def calc_bilateral(odd_analisada, odd_contraria, odd_aposta):
         odd_contraria = float(odd_contraria)
         odd_aposta = float(odd_aposta)
         
-        prob_analisada = (1 / odd_analisada) * 100
-        prob_contraria = (1 / odd_contraria) * 100
-        hold = ((odd_analisada * odd_contraria) / (odd_analisada + odd_contraria)) * 100
-        odd_justa = max(1, 100 / (prob_analisada + prob_contraria))
+        prob_analisada = 1 / odd_analisada
+        prob_contraria = 1 / odd_contraria
+        payout = 1 / (prob_analisada + prob_contraria)
         
-        kelly_fraction = (prob_analisada / 100 - (1 - prob_analisada / 100) / (odd_aposta - 1))
+        kelly_fraction = (prob_analisada - (1 - prob_analisada) / (odd_aposta - 1))
         proporcao_investimento_ideal = kelly_fraction * 100
-        valor_a_ser_investido = round(((proporcao_investimento_ideal / 8) * 100) / 25) * 25
         
-        payout = (prob_analisada + prob_contraria) / 100
+        # Calcular o valor a ser investido: cada 10% de proporção de investimento equivale a R$100
+        valor_a_ser_investido = round((proporcao_investimento_ideal / 10) * 100 / 25) * 25
         
-        return payout, odd_justa, proporcao_investimento_ideal, valor_a_ser_investido
+        return payout * 100, proporcao_investimento_ideal, valor_a_ser_investido
     except ValueError:
         return None, "Erro: Por favor, insira um número válido."
     except ZeroDivisionError:
@@ -72,8 +73,7 @@ def index():
 
 @app.route('/bilateral', methods=['GET', 'POST'])
 def bilateral():
-    hold = None
-    odd_justa = None
+    payout = None
     proporcao_investimento_ideal = None
     valor_a_ser_investido = None
     error_message = None
@@ -86,19 +86,17 @@ def bilateral():
         odd_contraria = request.form['odd_contraria']
         odd_aposta = request.form['odd_aposta']
         
-        hold, odd_justa, proporcao_investimento_ideal, valor_a_ser_investido = calc_bilateral(odd_analisada, odd_contraria, odd_aposta)
-        if hold is None:
-            error_message = odd_justa
-            hold = None
-            odd_justa = None
+        payout, proporcao_investimento_ideal, valor_a_ser_investido = calc_bilateral(odd_analisada, odd_contraria, odd_aposta)
+        if payout is None:
+            error_message = proporcao_investimento_ideal
+            payout = None
             proporcao_investimento_ideal = None
             valor_a_ser_investido = None
 
     mode = request.cookies.get('mode', 'light')
     
     return render_template('bilateral.html', 
-                           payout=hold, 
-                           odd_justa=odd_justa, 
+                           payout=payout, 
                            proporcao=proporcao_investimento_ideal, 
                            valor=valor_a_ser_investido, 
                            error=error_message, 
@@ -111,7 +109,7 @@ def bilateral():
 def toggle_mode():
     mode = request.cookies.get('mode', 'light')
     new_mode = 'dark' if mode == 'light' else 'light'
-    response = app.make_response()
+    response = make_response()
     response.set_cookie('mode', new_mode)
     return response
 

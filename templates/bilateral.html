@@ -202,7 +202,6 @@
                     {% if payout <= 88 %}
                         <p class="payout-low">A aposta deixa de ter valor.</p>
                     {% else %}
-                        <p>Odd justa: {{ odd_justa|round(2) }}</p>
                         <p>Proporção de investimento ideal: {{ proporcao|round(2) }}%</p>
                         <p>Valor a ser investido: R${{ valor }}</p>
                     {% endif %}
