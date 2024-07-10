@@ -22,10 +22,11 @@
         }
         .container {
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             width: 100%;
-            max-width: 1200px;
+            max-width: 600px;
             padding: 20px;
         }
         .calc-container {
@@ -33,7 +34,8 @@
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            width: 400px;
+            width: 350px;
+            height: 600px;
             text-align: center;
             transition: background-color 0.3s, color 0.3s;
         }
@@ -74,15 +76,9 @@
             font-weight: bold;
             text-align: center;
         }
-        .image-container {
-            width: 200px;
-            text-align: center;
-            margin: 0 100px;
-        }
-        .image-container img {
-            width: 100%;
-            height: auto;
-            border-radius: 8px;
+        .payout-low {
+            color: red;
+            font-weight: bold;
         }
         .buttons {
             display: flex;
@@ -103,10 +99,6 @@
         }
         .buttons .btn-option.active {
             background-color: #800080;
-        }
-        .payout-low {
-            color: red;
-            font-weight: bold;
         }
         .toggle-mode {
             position: absolute;
@@ -172,9 +164,6 @@
         <i id="mode-icon" class="fas {{ 'fa-moon' if mode == 'dark' else 'fa-sun' }}"></i>
     </button>
     <div class="container">
-        <div class="image-container">
-            <img src="/static/fumada.jpeg" alt="Ronaldo e Messi dando uma fumadinha juntos">
-        </div>
         <div class="calc-container" id="calc-container">
             <div class="buttons">
                 <button class="btn-option" onclick="location.href='/'">Mercado Unilateral</button>
@@ -210,9 +199,6 @@
                     <p class="error">{{ error }}</p>
                 {% endif %}
             </div>
-        </div>
-        <div class="image-container">
-            <img src="/static/doncic.jpg" alt="Luka Doncic">
         </div>
     </div>
 </body>
