@@ -49,7 +49,7 @@ def calc_cashout(odd_entrada, valor_entrada, odd_contraria):
         odd_contraria = float(odd_contraria)
 
         # Freebet na aposta original
-        freebet_original = valor_entrada / odd_contraria
+        freebet_original = valor_entrada / (odd_contraria - 1)
         lucro_freebet_original = (valor_entrada * odd_entrada) - valor_entrada - freebet_original
 
         # Win-Win
@@ -57,7 +57,7 @@ def calc_cashout(odd_entrada, valor_entrada, odd_contraria):
         lucro_win_win = (valor_entrada * odd_entrada - valor_entrada) - valor_investido_win_win
 
         # Freebet na aposta contrária
-        freebet_contraria = valor_entrada
+        freebet_contraria = (valor_entrada * odd_entrada) - valor_entrada
         lucro_freebet_contraria = (freebet_contraria * odd_contraria) - valor_entrada - freebet_contraria
 
         return round(freebet_original, 2), round(lucro_freebet_original, 2), round(valor_investido_win_win, 2), round(lucro_win_win, 2), round(freebet_contraria, 2), round(lucro_freebet_contraria, 2), None
