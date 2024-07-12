@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Apostas - Mercado Unilateral</title>
+    <title>Calculadora de Cashout</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
@@ -26,7 +26,7 @@
             justify-content: center;
             align-items: center;
             width: 100%;
-            max-width: 600px;
+            max-width: 900px;
             padding: 20px;
         }
         .calc-container {
@@ -34,8 +34,7 @@
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            width: 350px;
-            height: 500px;
+            width: 900px;
             text-align: center;
             transition: background-color 0.3s, color 0.3s;
         }
@@ -55,21 +54,48 @@
             padding: 8px;
             box-sizing: border-box;
         }
+        .form-group.half-width {
+            width: 48%;
+            display: inline-block;
+        }
         .btn {
-            width: 100%;
+            width: auto;
             padding: 10px;
             background-color: #28a745;
             border: none;
             color: white;
             cursor: pointer;
             border-radius: 4px;
+            margin: 0 auto;
+            display: block;
         }
         .btn:hover {
             background-color: #218838;
         }
         .result {
             margin-top: 20px;
+            display: flex;
+            justify-content: center;
             text-align: center;
+        }
+        .result table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .result th, .result td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        .result th {
+            background-color: #f2f2f2;
+            text-align: center;
+            color: #007bff; /* Cor azul dos botões */
+        }
+        body.dark-mode .result th {
+            background-color: #333;
+            text-align: center;
+            color: #007bff; /* Cor azul dos botões */
         }
         .error {
             color: red;
@@ -121,6 +147,15 @@
             background-color: #ffdd57;
             color: black;
         }
+        .form-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        .form-row .form-group {
+            flex: 1;
+            margin: 0 10px;
+        }
     </style>
     <script>
         function toggleMode() {
@@ -162,32 +197,71 @@
     <div class="container">
         <div class="calc-container" id="calc-container">
             <div class="buttons">
-                <button class="btn-option {{ 'active' if request.path == '/' else '' }}" onclick="location.href='/'">Mercado Unilateral</button>
-                <button class="btn-option {{ 'active' if request.path == '/bilateral' else '' }}" onclick="location.href='/bilateral'">Mercado Bilateral</button>
-                <button class="btn-option {{ 'active' if request.path == '/cashout' else '' }}" onclick="location.href='/cashout'">Calculadora de Cashout</button>
+                <button class="btn-option" onclick="location.href='/'">Mercado Unilateral</button>
+                <button class="btn-option" onclick="location.href='/bilateral'">Mercado Bilateral</button>
+                <button class="btn-option active" onclick="location.href='/cashout'">Calculadora de Cashout</button>
             </div>
-            <h1>Calculadora de Apostas</h1>
+            <h1>Calculadora de Cashout</h1>
             <form method="POST">
-                <div class="form-group">
-                    <label for="odd_decimal">Odd a ser analisada</label>
-                    <input type="number" step="0.00001" name="odd_decimal" value="{{ odd_decimal }}" required>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="aposta_entrada">Aposta de entrada</label>
+                        <input type="text" name="aposta_entrada" id="aposta_entrada" value="{{ aposta_entrada }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="aposta_adversaria">Aposta adversária</label>
+                        <input type="text" name="aposta_adversaria" id="aposta_adversaria" value="{{ aposta_adversaria }}" required>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="odd_aposta">Odd a ser apostada</label>
-                    <input type="number" step="0.00001" name="odd_aposta" value="{{ odd_aposta }}" required>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="odd_entrada">Odd</label>
+                        <input type="number" step="0.00001" name="odd_entrada" id="odd_entrada" value="{{ odd_entrada }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="valor_adversaria">Valor (R$)</label>
+                        <input type="number" step="0.01" name="valor_adversaria" id="valor_adversaria" value="{{ valor_adversaria }}" required>
+                    </div>
+                </div>
+                <div class="form-group half-width">
+                    <label for="odd_contraria">Odd da aposta adversária</label>
+                    <input type="number" step="0.00001" name="odd_contraria" id="odd_contraria" value="{{ odd_contraria }}" required>
                 </div>
                 <button type="submit" class="btn">Calcular</button>
             </form>
             <div class="result">
-                {% if proporcao is not none %}
-                    <p>Proporção de investimento ideal: {{ proporcao|round(2) }}%</p>
-                    <p>Valor a ser investido: R${{ valor }}</p>
-                {% endif %}
-                {% if error %}
-                    <p class="error">{{ error }}</p>
-                {% endif %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tipo de Aposta</th>
+                            <th>Valor</th>
+                            <th>Lucro</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Freebet em {{ aposta_entrada }}</td>
+                            <td>R${{ freebet_original }}</td>
+                            <td>R${{ lucro_freebet_original }}</td
+                            </tr>
+                            <tr>
+                                <td>Win-Win</td>
+                                <td>R${{ win_win }}</td>
+                                <td>R${{ lucro_win_win }}</td>
+                            </tr>
+                            <tr>
+                                <td>Freebet em {{ aposta_adversaria }}</td>
+                                <td>R${{ freebet_contraria }}</td>
+                                <td>R${{ lucro_freebet_contraria }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    {% if error %}
+                        <p class="error">{{ error }}</p>
+                    {% endif %}
+                </div>
             </div>
         </div>
-    </div>
-</body>
-</html>
+    </body>
+    </html>
+    

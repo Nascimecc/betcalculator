@@ -166,9 +166,10 @@
     <div class="container">
         <div class="calc-container" id="calc-container">
             <div class="buttons">
-                <button class="btn-option" onclick="location.href='/'">Mercado Unilateral</button>
-                <button class="btn-option active" onclick="location.href='/bilateral'">Mercado Bilateral</button>
-            </div>
+                <button class="btn-option {{ 'active' if request.path == '/' else '' }}" onclick="location.href='/'">Mercado Unilateral</button>
+                <button class="btn-option {{ 'active' if request.path == '/bilateral' else '' }}" onclick="location.href='/bilateral'">Mercado Bilateral</button>
+                <button class="btn-option {{ 'active' if request.path == '/cashout' else '' }}" onclick="location.href='/cashout'">Calculadora de Cashout</button>
+            </div>         
             <h1>Calculadora de Apostas</h1>
             <form method="POST">
                 <div class="form-group">

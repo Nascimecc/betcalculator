@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, make_response
 
 app = Flask(__name__)
 
+# Função calc_kelly
 def calc_kelly(prob_evento, odd_aposta):
     try:
         prob_evento = float(prob_evento)
@@ -10,7 +11,6 @@ def calc_kelly(prob_evento, odd_aposta):
         kelly_fraction = (prob_evento / 100 - (1 - prob_evento / 100) / (odd_aposta - 1))
         proporcao_investimento_ideal = kelly_fraction * 100
         
-        # Calcular o valor a ser investido: cada 10% de proporção de investimento equivale a R$100
         valor_a_ser_investido = round((proporcao_investimento_ideal / 10) * 100 / 25) * 25
         
         return proporcao_investimento_ideal, valor_a_ser_investido
@@ -19,6 +19,7 @@ def calc_kelly(prob_evento, odd_aposta):
     except ZeroDivisionError:
         return None, "Erro: A odd não pode ser zero."
 
+# Função calc_bilateral
 def calc_bilateral(odd_analisada, odd_contraria, odd_aposta):
     try:
         odd_analisada = float(odd_analisada)
@@ -32,7 +33,6 @@ def calc_bilateral(odd_analisada, odd_contraria, odd_aposta):
         kelly_fraction = (prob_analisada - (1 - prob_analisada) / (odd_aposta - 1))
         proporcao_investimento_ideal = kelly_fraction * 100
         
-        # Calcular o valor a ser investido: cada 10% de proporção de investimento equivale a R$100
         valor_a_ser_investido = round((proporcao_investimento_ideal / 10) * 100 / 25) * 25
         
         return payout * 100, proporcao_investimento_ideal, valor_a_ser_investido
@@ -41,6 +41,32 @@ def calc_bilateral(odd_analisada, odd_contraria, odd_aposta):
     except ZeroDivisionError:
         return None, "Erro: A odd não pode ser zero."
 
+# Função calc_cashout
+def calc_cashout(odd_entrada, valor_entrada, odd_contraria):
+    try:
+        odd_entrada = float(odd_entrada)
+        valor_entrada = float(valor_entrada)
+        odd_contraria = float(odd_contraria)
+
+        # Freebet na aposta original
+        freebet_original = valor_entrada / odd_contraria
+        lucro_freebet_original = (valor_entrada * odd_entrada) - valor_entrada - freebet_original
+
+        # Win-Win
+        valor_investido_win_win = (valor_entrada * odd_entrada) / odd_contraria
+        lucro_win_win = (valor_entrada * odd_entrada - valor_entrada) - valor_investido_win_win
+
+        # Freebet na aposta contrária
+        freebet_contraria = valor_entrada
+        lucro_freebet_contraria = (freebet_contraria * odd_contraria) - valor_entrada - freebet_contraria
+
+        return round(freebet_original, 2), round(lucro_freebet_original, 2), round(valor_investido_win_win, 2), round(lucro_win_win, 2), round(freebet_contraria, 2), round(lucro_freebet_contraria, 2), None
+    except ValueError:
+        return None, None, None, None, None, None, "Erro: Por favor, insira um número válido."
+    except ZeroDivisionError:
+        return None, None, None, None, None, None, "Erro: A odd não pode ser zero."
+
+# Rota para a calculadora unilateral
 @app.route('/', methods=['GET', 'POST'])
 def index():
     proporcao_investimento_ideal = None
@@ -71,6 +97,7 @@ def index():
                            odd_aposta=odd_aposta,
                            mode=mode)
 
+# Rota para a calculadora bilateral
 @app.route('/bilateral', methods=['GET', 'POST'])
 def bilateral():
     payout = None
@@ -103,6 +130,48 @@ def bilateral():
                            odd_analisada=odd_analisada, 
                            odd_contraria=odd_contraria, 
                            odd_aposta=odd_aposta,
+                           mode=mode)
+
+# Rota para a calculadora de cashout
+@app.route('/cashout', methods=['GET', 'POST'])
+def cashout():
+    freebet_original = ''
+    lucro_freebet_original = ''
+    win_win = ''
+    lucro_win_win = ''
+    freebet_contraria = ''
+    lucro_freebet_contraria = ''
+    error_message = None
+    aposta_entrada = ''
+    aposta_adversaria = ''
+    odd_entrada = ''
+    valor_adversaria = ''
+    odd_contraria = ''
+    
+    if request.method == 'POST':
+        aposta_entrada = request.form['aposta_entrada']
+        aposta_adversaria = request.form['aposta_adversaria']
+        odd_entrada = request.form['odd_entrada']
+        valor_adversaria = request.form['valor_adversaria']
+        odd_contraria = request.form['odd_contraria']
+        
+        freebet_original, lucro_freebet_original, win_win, lucro_win_win, freebet_contraria, lucro_freebet_contraria, error_message = calc_cashout(odd_entrada, valor_adversaria, odd_contraria)
+
+    mode = request.cookies.get('mode', 'light')
+    
+    return render_template('cashout.html', 
+                           freebet_original=freebet_original, 
+                           lucro_freebet_original=lucro_freebet_original,
+                           win_win=win_win, 
+                           lucro_win_win=lucro_win_win,
+                           freebet_contraria=freebet_contraria, 
+                           lucro_freebet_contraria=lucro_freebet_contraria,
+                           error=error_message, 
+                           aposta_entrada=aposta_entrada, 
+                           aposta_adversaria=aposta_adversaria, 
+                           odd_entrada=odd_entrada, 
+                           valor_adversaria=valor_adversaria, 
+                           odd_contraria=odd_contraria,
                            mode=mode)
 
 @app.route('/toggle_mode', methods=['POST'])
