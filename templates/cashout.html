@@ -34,7 +34,8 @@
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            width: 900px;
+            width: 100%;
+            max-width: 600px;
             text-align: center;
             transition: background-color 0.3s, color 0.3s;
         }
@@ -149,12 +150,21 @@
         }
         .form-row {
             display: flex;
+            flex-direction: column;
             justify-content: space-between;
             margin-bottom: 15px;
         }
         .form-row .form-group {
             flex: 1;
-            margin: 0 10px;
+            margin: 10px 0;
+        }
+        @media (min-width: 600px) {
+            .form-row {
+                flex-direction: row;
+            }
+            .form-group.half-width {
+                width: 48%;
+            }
         }
     </style>
     <script>
@@ -242,26 +252,25 @@
                         <tr>
                             <td>Freebet em {{ aposta_entrada }}</td>
                             <td>R${{ freebet_original }}</td>
-                            <td>R${{ lucro_freebet_original }}</td
-                            </tr>
-                            <tr>
-                                <td>Win-Win</td>
-                                <td>R${{ win_win }}</td>
-                                <td>R${{ lucro_win_win }}</td>
-                            </tr>
-                            <tr>
-                                <td>Freebet em {{ aposta_adversaria }}</td>
-                                <td>R${{ freebet_contraria }}</td>
-                                <td>R${{ lucro_freebet_contraria }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    {% if error %}
-                        <p class="error">{{ error }}</p>
-                    {% endif %}
-                </div>
+                            <td>R${{ lucro_freebet_original }}</td>
+                        </tr>
+                        <tr>
+                            <td>Win-Win</td>
+                            <td>R${{ win_win }}</td>
+                            <td>R${{ lucro_win_win }}</td>
+                        </tr>
+                        <tr>
+                            <td>Freebet em {{ aposta_adversaria }}</td>
+                            <td>R${{ freebet_contraria }}</td>
+                            <td>R${{ lucro_freebet_contraria }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                {% if error %}
+                    <p class="error">{{ error }}</p>
+                {% endif %}
             </div>
         </div>
-    </body>
-    </html>
-    
+    </div>
+</body>
+</html>
